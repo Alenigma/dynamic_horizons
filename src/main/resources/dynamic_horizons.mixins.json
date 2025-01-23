@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "net.alenigma.dynamic_horizons.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "cosmic_horizons.CollisionMixin",
+    "cosmic_horizons.PlanetRenderMixin",
+    "cosmic_horizons.TravelFromPlanetMixin"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
