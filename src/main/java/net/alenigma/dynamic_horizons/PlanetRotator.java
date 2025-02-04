@@ -13,6 +13,8 @@ import net.minecraft.nbt.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -22,15 +24,24 @@ import java.util.regex.Pattern;
 import static net.minecraft.world.level.GameRules.RULE_DAYLIGHT;
 
 public class PlanetRotator {
+    public static float getPartialTick(LevelAccessor world) {
+        return world.isClientSide() ? getClientPartialTick() : 0;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private static float getClientPartialTick() {
+        return Minecraft.getInstance().getPartialTick();
+    }
+
     public static Vec3 getCords(LevelAccessor world, String dimension, double partialTick, Vec3 pos, CompoundTag obj) {
-        if (obj.contains("static") && ((ByteTag) obj.get("static")).getAsByte() == 1) return pos;
+        if (obj.contains("static") && obj.getByte("static") == 1) return pos;
         double ticks = world.getLevelData().getDayTime();
         CompoundTag anchor = obj.contains("anchor_name") ?
-                (CompoundTag) ((ListTag) Objects.requireNonNull(CosmosModVariables.WorldVariables.get(world).render_data_map.get(dimension))).stream().filter(e -> ((CompoundTag) e).get("object_name").getAsString().equals(obj.get("anchor_name").getAsString())).findFirst().orElse(new CompoundTag())
+                (CompoundTag) ((ListTag) Objects.requireNonNull(CosmosModVariables.WorldVariables.get(world).render_data_map.get(dimension))).stream().filter(e -> ((CompoundTag) e).getString("object_name").equals(obj.getString("anchor_name"))).findFirst().orElse(new CompoundTag())
                 : (CompoundTag) ((ListTag) Objects.requireNonNull(CosmosModVariables.WorldVariables.get(world).render_data_map.get(dimension))).get(0);
-        double anchor_x = ((DoubleTag) Objects.requireNonNull(anchor.get("x"))).getAsDouble();
-        double anchor_y = ((DoubleTag) Objects.requireNonNull(anchor.get("y"))).getAsDouble();
-        double anchor_z = ((DoubleTag) Objects.requireNonNull(anchor.get("z"))).getAsDouble();
+        double anchor_x = anchor.getDouble("x");
+        double anchor_y = anchor.getDouble("y");
+        double anchor_z = anchor.getDouble("z");
         Vec3 chain_cords = new Vec3(anchor_x, anchor_y, anchor_z);
         double r = chain_cords.distanceTo(pos);
         if (obj.contains("anchor_name")) {
@@ -40,9 +51,14 @@ public class PlanetRotator {
         }
         if (r == (double) 0.0F) return pos;
         if (!world.getLevelData().getGameRules().getBoolean(RULE_DAYLIGHT)) partialTick = 0;
-        double speed = obj.contains("speed") ? ((DoubleTag) obj.get("speed")).getAsDouble() : 10.0;
+        double speed = obj.contains("speed") ? obj.getDouble("speed") : ((CompoundTag) CosmosModVariables.WorldVariables.get(world).dimensional_data.get(dimension)).getDouble("default_speed");
         double a = (ticks + partialTick) * Math.PI * (((double) 1.0F)/r) * speed;
-        return new Vec3(chain_cords.x + r*Math.sin(a), pos.y, chain_cords.z + r*Math.cos(a));
+        Vec3 rotation = new Vec3(r*Math.sin(a), 0, r*Math.cos(a));
+        rotation = rotation.xRot(0.017453293F * obj.getFloat("orbit_pitch"));
+        rotation = rotation.yRot(0.017453293F * obj.getFloat("orbit_yaw"));
+        rotation = rotation.zRot(0.017453293F * obj.getFloat("orbit_roll"));
+        pos = chain_cords.add(rotation);
+        return pos;
     }
 
     public static List<Object> changeOrder(LevelAccessor world, Entity entity, double partialTick, ListTag map, double order, String dimension, Vec3 position) {
@@ -143,7 +159,7 @@ public class PlanetRotator {
             String regex = "(-?\\d*) (-?\\d*) (-?\\d*)$";
             Matcher matcher = Pattern.compile(regex).matcher(pCommand);
             if (matcher.find()) {
-                Vec3 newPos = PlanetRotator.getCords(world, atmospheric_data.get("travel_to").getAsString(), Minecraft.getInstance().getPartialTick(), new Vec3(((DoubleTag) obj.get("x")).getAsDouble(), ((DoubleTag) obj.get("y")).getAsDouble(), ((DoubleTag) obj.get("z")).getAsDouble()), obj);
+                Vec3 newPos = PlanetRotator.getCords(world, atmospheric_data.get("travel_to").getAsString(), getPartialTick(world), new Vec3(((DoubleTag) obj.get("x")).getAsDouble(), ((DoubleTag) obj.get("y")).getAsDouble(), ((DoubleTag) obj.get("z")).getAsDouble()), obj);
                 return pCommand.replaceFirst(regex, newPos.x + " " + (newPos.y+((DoubleTag) obj.get("scale")).getAsDouble()) + " " + newPos.z);
             }
         }
