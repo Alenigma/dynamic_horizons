@@ -44,7 +44,7 @@ public class ValkyrienCompatibility {
             double mass = serverShip.getInertiaData().getMass();
             Vec3 force = error.scale(mass*20).subtract(velocity.scale(mass*20));
             Quaterniond futureRot = new Quaterniond().rotateXYZ(0.017453293F * obj.getDouble("pitch"), 0.017453293F * obj.getDouble("yaw"), 0.017453293F * obj.getDouble("roll"));
-            if (!futureRot.equals(serverShip.getTransform().getShipToWorldRotation())) VSGameUtilsKt.getShipObjectWorld(level).teleportShip(serverShip, new ShipTeleportDataImpl(serverShip.getTransform().getPositionInWorld(), futureRot, new Vector3d(), new Vector3d(), null, null));
+            if (obj.getByte("respect_rotation") == 1 && !futureRot.equals(serverShip.getTransform().getShipToWorldRotation())) VSGameUtilsKt.getShipObjectWorld(level).teleportShip(serverShip, new ShipTeleportDataImpl(serverShip.getTransform().getPositionInWorld(), futureRot, new Vector3d(), new Vector3d(), null, null));
             if (force.length() < 1e12) forceApplier.applyInvariantForce(VectorConversionsMCKt.toJOML(force));
             else forceApplier.applyInvariantForce(VectorConversionsMCKt.toJOML(force.scale(1e12/force.length())));
         }

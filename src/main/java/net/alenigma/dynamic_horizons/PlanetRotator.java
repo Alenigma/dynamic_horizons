@@ -51,7 +51,8 @@ public class PlanetRotator {
         }
         if (r == (double) 0.0F) return pos;
         if (!world.getLevelData().getGameRules().getBoolean(RULE_DAYLIGHT)) partialTick = 0;
-        double speed = obj.contains("speed") ? obj.getDouble("speed") : ((CompoundTag) CosmosModVariables.WorldVariables.get(world).dimensional_data.get(dimension)).getDouble("default_speed");
+        CompoundTag dim_data = ((CompoundTag) CosmosModVariables.WorldVariables.get(world).dimensional_data.get(dimension));
+        double speed = obj.contains("speed") ? obj.getDouble("speed") : dim_data.contains("default_speed") ? dim_data.getDouble("default_speed") : 0.1;
         double a = (ticks + partialTick) * Math.PI * (((double) 1.0F)/r) * speed;
         Vec3 rotation = new Vec3(r*Math.sin(a), 0, r*Math.cos(a));
         rotation = rotation.xRot(0.017453293F * obj.getFloat("orbit_pitch"));
