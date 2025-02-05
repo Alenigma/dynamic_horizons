@@ -14,6 +14,6 @@ public class TravelFromPlanetMixin {
     @ModifyArg(method={"execute"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;performPrefixedCommand(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;)I"), index = 1, remap = false)
 //    @ModifyArg(method={"execute"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;m_230957_(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;)I"), index = 1, remap = false)
     private static String changeTravelDestination(String pCommand, @Local(argsOnly = true) LevelAccessor world, @Local CompoundTag atmospheric_data) {
-        return PlanetRotator.redirectTravelDestination(pCommand, world, atmospheric_data);
+        return PlanetRotator.redirectTravelDestinationFromPlanet(pCommand, world, atmospheric_data);
     }
 }

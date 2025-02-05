@@ -154,7 +154,7 @@ public class PlanetRotator {
         }
     }
 
-    public static String redirectTravelDestination (String pCommand, LevelAccessor world, CompoundTag atmospheric_data) {
+    public static String redirectTravelDestinationFromPlanet(String pCommand, LevelAccessor world, CompoundTag atmospheric_data) {
         if (pCommand.contains("tp") && atmospheric_data.contains("object_name")) {
             CompoundTag obj = (CompoundTag) ((ListTag) Objects.requireNonNull(CosmosModVariables.WorldVariables.get(world).render_data_map.get(atmospheric_data.get("travel_to").getAsString()))).stream().filter(e -> Objects.requireNonNullElse(((CompoundTag) e).get("object_name"), new CompoundTag()).getAsString().equals(atmospheric_data.get("object_name").getAsString())).findFirst().orElse(new CompoundTag());
             String regex = "(-?\\d*) (-?\\d*) (-?\\d*)$";

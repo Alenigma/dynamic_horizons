@@ -5,6 +5,7 @@
   "mixins": [
     "cosmic_horizons.CollisionMixin",
     "cosmic_horizons.PlanetRenderMixin",
+    "cosmic_horizons.TravelCProcedureMixin",
     "cosmic_horizons.TravelFromPlanetMixin"
   ],
   "client": [],
